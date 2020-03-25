@@ -410,6 +410,13 @@ void Shepherd::launchShepherd( ) {
     QObject::connect( _process, &QProcess::readyReadStandardError,                               this, &Shepherd::process_readyReadStandardError  );
     QObject::connect( _process, &QProcess::readyReadStandardOutput,                              this, &Shepherd::process_readyReadStandardOutput );
     QObject::connect( _process, QOverload<int, QProcess::ExitStatus>::of( &QProcess::finished ), this, &Shepherd::process_finished                );
+    #if defined _DEBUG
+    //for purpose of printing emulation Shepherd could not start properly
+    if ( g_settings.pretendPrinterIsOnline ) {
+        QObject::disconnect( _process, &QProcess::errorOccurred, nullptr, nullptr);
+        QObject::connect( _process, &QProcess::errorOccurred,                                    this, &Shepherd::process_started                 );
+    }
+    #endif // defined _DEBUG
     _process->setWorkingDirectory( ShepherdPath );
     _process->start( "./stdio-shepherd.py" );
 }
